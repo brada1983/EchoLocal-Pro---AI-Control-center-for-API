@@ -1,0 +1,167 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    color-scheme: dark;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  html, body {
+    @apply bg-background text-text-primary;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    font-size: 14px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    min-height: 100vh;
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply bg-border-subtle rounded-full;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-border-strong;
+  }
+
+  /* Selection */
+  ::selection {
+    @apply bg-accent-blue-muted text-text-primary;
+  }
+
+  /* Focus ring */
+  :focus-visible {
+    @apply outline-none ring-2 ring-accent-blue ring-offset-0;
+  }
+}
+
+@layer components {
+  /* Card */
+  .card {
+    @apply bg-background-secondary border border-border rounded-lg;
+  }
+
+  .card-elevated {
+    @apply bg-background-secondary rounded-lg shadow-panel-elevated;
+  }
+
+  /* Button base */
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 px-3 py-1.5
+           rounded text-sm font-medium transition-all duration-150
+           disabled:opacity-40 disabled:cursor-not-allowed
+           focus-visible:ring-2 focus-visible:ring-accent-blue;
+  }
+
+  .btn-primary {
+    @apply btn bg-accent-green-muted text-white hover:bg-accent-green;
+  }
+
+  .btn-secondary {
+    @apply btn bg-background-tertiary border border-border text-text-primary
+           hover:border-border-subtle hover:bg-border;
+  }
+
+  .btn-danger {
+    @apply btn bg-accent-red-muted text-white hover:bg-accent-red;
+  }
+
+  .btn-ghost {
+    @apply btn text-text-secondary hover:text-text-primary hover:bg-background-tertiary;
+  }
+
+  .btn-icon {
+    @apply btn p-1.5 text-text-secondary hover:text-text-primary hover:bg-background-tertiary;
+  }
+
+  /* Input */
+  .input {
+    @apply w-full bg-background-tertiary border border-border rounded px-3 py-1.5
+           text-sm text-text-primary placeholder:text-text-muted
+           focus:outline-none focus:border-accent-blue-muted
+           transition-colors duration-150;
+  }
+
+  /* Label */
+  .label {
+    @apply text-xs font-medium text-text-secondary uppercase tracking-wider;
+  }
+
+  /* Badge */
+  .badge {
+    @apply inline-flex items-center px-2 py-0.5 rounded text-xs font-medium;
+  }
+
+  /* Divider */
+  .divider {
+    @apply border-t border-border;
+  }
+
+  /* Monospace (logs, raw data) */
+  .mono {
+    font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  }
+
+  /* Live status dot (green=up, red=down, orange=warning) */
+  .status-dot {
+    @apply inline-block w-2 h-2 rounded-full;
+  }
+
+  .status-dot-live {
+    @apply status-dot animate-pulse-glow;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .scrollbar-none {
+    scrollbar-width: none;
+    &::-webkit-scrollbar { display: none; }
+  }
+}
+
+/* Shimmer loading */
+@keyframes shimmer {
+  from { background-position: -200% center; }
+  to   { background-position:  200% center; }
+}
+
+.shimmer {
+  background: linear-gradient(
+    90deg,
+    theme('colors.background.secondary') 0%,
+    theme('colors.background.tertiary') 50%,
+    theme('colors.background.secondary') 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+}
+
+/* Progress bar shimmer overlay — used for model pull progress */
+.progress-bar-shimmer {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.25) 50%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.8s ease-in-out infinite;
+}
