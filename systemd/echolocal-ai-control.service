@@ -1,0 +1,22 @@
+[Unit]
+Description=EchoLocal AI Control dashboard
+After=network.target whisper-api.service ollama.service
+
+[Service]
+Type=simple
+User=echolocal-ai
+Group=echolocal-ai
+WorkingDirectory=/opt/echolocal-ai-control
+EnvironmentFile=/opt/echolocal-ai-control/.env
+Environment=NODE_ENV=production
+ExecStart=/usr/bin/node /opt/echolocal-ai-control/server.js
+Restart=on-failure
+RestartSec=5
+
+# Future env tweaks (e.g. PORT) belong in an override, not edits here —
+# consistent with whisper-api.service.d/override.conf and
+# ollama.service.d/override.conf already on this LXC:
+#   systemctl edit echolocal-ai-control
+
+[Install]
+WantedBy=multi-user.target
