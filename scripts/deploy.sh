@@ -30,7 +30,11 @@ else
   git fetch origin main
   git checkout -f main
 fi
-npm ci --omit=dev
+# Full install, not --omit=dev: the build step needs typescript/tailwindcss/
+# postcss (all devDependencies) to process tsconfig.json's path aliases and
+# Tailwind config — without them Next's webpack build silently can't resolve
+# "@/..."-style imports. The extra ~100MB on disk is irrelevant here.
+npm ci
 npm run build
 chown -R echolocal-ai:echolocal-ai "$REMOTE_DIR"
 cp systemd/echolocal-ai-control.service /etc/systemd/system/echolocal-ai-control.service
