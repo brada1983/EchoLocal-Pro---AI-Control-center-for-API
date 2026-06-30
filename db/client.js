@@ -10,7 +10,13 @@ const { MIGRATIONS } = require("./migrations");
 // bundled route since they all run in the same node process.
 const DB_PATH = process.env.DB_PATH || path.join(process.cwd(), "data", "app.sqlite3");
 
-let dbInstance = null;
+// globalThis, not a module-level variable: Next's bundler gives each API
+// route its own webpack bundle (and its own copy of this module), so a
+// plain `let dbInstance` would open a separate DatabaseSync connection per
+// route instead of sharing one. globalThis is a true process-wide singleton
+// regardless of which bundle is executing — see server/ws/hub-instance.js
+// for the same pattern applied to the WebSocket hub.
+const GLOBAL_KEY = "__echolocalAiControlDbPromise";
 
 function runMigrations(db) {
   db.exec(
@@ -52,19 +58,21 @@ async function bootstrapAdminUser(db) {
 }
 
 /** Returns the singleton DatabaseSync instance, running migrations + admin bootstrap on first call. */
-async function getDb() {
-  if (dbInstance) return dbInstance;
+function getDb() {
+  if (!globalThis[GLOBAL_KEY]) {
+    globalThis[GLOBAL_KEY] = (async () => {
+      fs.mkdirSync(path.dirname(DB_PATH), { recursive: true });
+      const db = new DatabaseSync(DB_PATH);
+      db.exec("PRAGMA journal_mode = WAL");
+      db.exec("PRAGMA foreign_keys = ON");
 
-  fs.mkdirSync(path.dirname(DB_PATH), { recursive: true });
-  const db = new DatabaseSync(DB_PATH);
-  db.exec("PRAGMA journal_mode = WAL");
-  db.exec("PRAGMA foreign_keys = ON");
+      runMigrations(db);
+      await bootstrapAdminUser(db);
 
-  runMigrations(db);
-  await bootstrapAdminUser(db);
-
-  dbInstance = db;
-  return dbInstance;
+      return db;
+    })();
+  }
+  return globalThis[GLOBAL_KEY];
 }
 
 module.exports = { getDb, DB_PATH };

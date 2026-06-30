@@ -21,7 +21,7 @@ const next = require("next");
 const { WebSocketServer } = require("ws");
 
 const { getDb } = require("./db/client");
-const { WebSocketHub } = require("./server/ws/hub");
+const hub = require("./server/ws/hub-instance");
 const { authenticateUpgradeRequest, rejectUpgrade } = require("./server/ws/auth");
 
 const statsTick = require("./server/collectors/stats-tick");
@@ -35,7 +35,6 @@ const hostname = process.env.HOST || "0.0.0.0";
 
 const app = next({ dev, hostname, port });
 const handle = app.getRequestHandler();
-const hub = new WebSocketHub();
 
 async function main() {
   await app.prepare();
@@ -102,7 +101,3 @@ main().catch((err) => {
   console.error("[server] fatal startup error:", err);
   process.exit(1);
 });
-
-// Exposed for API routes that need to broadcast (e.g. model pull progress)
-// without importing server.js's module-local `hub` directly.
-module.exports = { hub };
