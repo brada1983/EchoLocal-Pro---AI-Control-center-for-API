@@ -3,6 +3,14 @@
 // `available: false` as "show a GPU-unavailable indicator", not an error.
 const { execFile } = require("child_process");
 
+// parseFloat(x) || null is wrong here: a legitimate reading of 0 (e.g. idle
+// GPU at 0% utilization) is falsy in JS, so `|| null` would silently turn a
+// real 0 into a missing value. Use isNaN instead.
+function numOrNull(value) {
+  const n = parseFloat(value);
+  return Number.isNaN(n) ? null : n;
+}
+
 function getGpuStats() {
   return new Promise((resolve) => {
     execFile(
@@ -24,18 +32,18 @@ function getGpuStats() {
           }
           resolve({
             available: true,
-            utilPct: parseFloat(card["GPU use (%)"]) || null,
-            vramUsedMb: card["VRAM Total Used Memory (B)"]
+            utilPct: numOrNull(card["GPU use (%)"]),
+            vramUsedMb: card["VRAM Total Used Memory (B)"] !== undefined
               ? Math.round(Number(card["VRAM Total Used Memory (B)"]) / 1024 / 1024)
               : null,
-            vramTotalMb: card["VRAM Total Memory (B)"]
+            vramTotalMb: card["VRAM Total Memory (B)"] !== undefined
               ? Math.round(Number(card["VRAM Total Memory (B)"]) / 1024 / 1024)
               : null,
-            tempC: parseFloat(card["Temperature (Sensor edge) (C)"]) || null,
+            tempC: numOrNull(card["Temperature (Sensor edge) (C)"]),
             // Field name confirmed against the real LXC's rocm-smi output —
             // differs from some documented/older ROCm versions which use
             // "Average Graphics Package Power (W)" instead.
-            powerW: parseFloat(card["Current Socket Graphics Package Power (W)"]) || null,
+            powerW: numOrNull(card["Current Socket Graphics Package Power (W)"]),
           });
         } catch {
           resolve({ available: false });
