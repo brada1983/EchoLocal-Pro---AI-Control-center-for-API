@@ -32,7 +32,10 @@ function getGpuStats() {
               ? Math.round(Number(card["VRAM Total Memory (B)"]) / 1024 / 1024)
               : null,
             tempC: parseFloat(card["Temperature (Sensor edge) (C)"]) || null,
-            powerW: parseFloat(card["Average Graphics Package Power (W)"]) || null,
+            // Field name confirmed against the real LXC's rocm-smi output —
+            // differs from some documented/older ROCm versions which use
+            // "Average Graphics Package Power (W)" instead.
+            powerW: parseFloat(card["Current Socket Graphics Package Power (W)"]) || null,
           });
         } catch {
           resolve({ available: false });
