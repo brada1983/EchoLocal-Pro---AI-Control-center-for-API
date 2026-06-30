@@ -81,4 +81,36 @@ async function chat(payload) {
   return res.json();
 }
 
-module.exports = { baseUrl, tags, ps, pull, deleteModel, generate, chat };
+/**
+ * Streams NDJSON chat chunks, same read-loop shape as `pull()`.
+ * `onChunk(obj)` is called per line (each `{message:{role,content}, done}`).
+ */
+async function chatStream(payload, onChunk) {
+  const res = await fetch(`${baseUrl()}/api/chat`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ ...payload, stream: true }),
+  });
+  if (!res.ok || !res.body) throw new Error(`Ollama /api/chat returned ${res.status}`);
+
+  const reader = res.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = "";
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    buffer += decoder.decode(value, { stream: true });
+    const lines = buffer.split("\n");
+    buffer = lines.pop() ?? "";
+    for (const line of lines) {
+      if (!line.trim()) continue;
+      try {
+        onChunk(JSON.parse(line));
+      } catch {
+        // ignore malformed line, keep streaming
+      }
+    }
+  }
+}
+
+module.exports = { baseUrl, tags, ps, pull, deleteModel, generate, chat, chatStream };

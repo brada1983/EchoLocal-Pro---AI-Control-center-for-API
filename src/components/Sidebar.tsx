@@ -12,11 +12,13 @@ import {
   Terminal,
   BellRing,
   LogOut,
+  MessageSquare,
 } from "lucide-react";
 import clsx from "clsx";
 
 const NAV_ITEMS = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/chat", label: "Chat", icon: MessageSquare },
   { href: "/services", label: "Services", icon: Server },
   { href: "/models", label: "Ollama Models", icon: Boxes },
   { href: "/whisper", label: "Whisper", icon: AudioLines },

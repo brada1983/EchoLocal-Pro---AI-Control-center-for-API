@@ -124,6 +124,23 @@
   .status-dot-live {
     @apply status-dot animate-pulse-glow;
   }
+
+  /* Markdown rendering inside chat assistant bubbles (no typography plugin installed) */
+  .prose-chat :where(p) { @apply my-1.5 leading-relaxed; }
+  .prose-chat :where(ul, ol) { @apply my-1.5 pl-5 space-y-0.5; }
+  .prose-chat :where(ul) { @apply list-disc; }
+  .prose-chat :where(ol) { @apply list-decimal; }
+  .prose-chat :where(h1, h2, h3) { @apply font-semibold text-text-primary mt-3 mb-1; }
+  .prose-chat :where(a) { @apply text-accent-blue underline; }
+  .prose-chat :where(code) {
+    @apply mono text-xs bg-background-tertiary px-1 py-0.5 rounded;
+  }
+  .prose-chat :where(pre) {
+    @apply mono text-xs bg-background-tertiary p-3 rounded overflow-x-auto my-2;
+  }
+  .prose-chat :where(pre code) { @apply bg-transparent p-0; }
+  .prose-chat :where(table) { @apply border-collapse my-2 text-xs; }
+  .prose-chat :where(th, td) { @apply border border-border px-2 py-1; }
 }
 
 @layer utilities {

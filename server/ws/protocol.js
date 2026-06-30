@@ -27,9 +27,21 @@ function pullProgressMessage(data) {
   return { type: "pull-progress", data };
 }
 
+/** @returns {{type:'chat-delta', data: object}} */
+function chatDeltaMessage(data) {
+  return { type: "chat-delta", data };
+}
+
+/** @returns {{type:'chat-done', data: object}} */
+function chatDoneMessage(data) {
+  return { type: "chat-done", data };
+}
+
 module.exports = {
   statsMessage,
   logMessage,
   alertMessage,
   pullProgressMessage,
+  chatDeltaMessage,
+  chatDoneMessage,
 };

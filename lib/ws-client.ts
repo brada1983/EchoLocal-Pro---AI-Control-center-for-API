@@ -7,6 +7,8 @@ type ServerMessage =
   | { type: "log"; channel: string; line: { ts: number; raw: string } }
   | { type: "alert"; data: { kind: string; message: string; ts: number } }
   | { type: "pull-progress"; data: unknown }
+  | { type: "chat-delta"; data: unknown }
+  | { type: "chat-done"; data: unknown }
   | { type: "pong" };
 
 /**
