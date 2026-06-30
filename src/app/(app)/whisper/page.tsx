@@ -56,7 +56,7 @@ export default function WhisperPage() {
 
   if (!config) return <p className="text-sm text-text-secondary">Loading...</p>;
 
-  const gpuAvailable = health?.device === "cuda" || health?.device === "rocm";
+  const gpuAvailable = health?.device === "cuda" || health?.device === "rocm" || health?.device === "vulkan";
 
   return (
     <div className="space-y-6 max-w-2xl">
@@ -74,8 +74,8 @@ export default function WhisperPage() {
           <div className="flex items-start gap-2 text-xs text-accent-orange mt-1">
             <AlertTriangle className="w-3.5 h-3.5 mt-0.5 shrink-0" />
             <span>
-              GPU not available — the LXC&apos;s ROCm iGPU isn&apos;t visible to ctranslate2,
-              so Whisper runs on CPU int8. See project notes for details.
+              GPU not available — Whisper is running on CPU. If this is unexpected, check
+              the whisper-api service logs for a Vulkan init failure.
             </span>
           </div>
         )}

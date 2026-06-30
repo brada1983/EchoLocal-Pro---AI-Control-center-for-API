@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { StatusDot } from "@/components/StatusDot";
 import { GpuGauge } from "@/components/GpuGauge";
 import { useWebSocketChannel } from "@rootlib/ws-client";
@@ -18,16 +18,35 @@ type StatsData = {
   services: { whisperApi: "active" | "inactive" | "failed" | "unknown"; ollama: "active" | "inactive" | "failed" | "unknown" };
 };
 
+type WhisperHealth = { device?: string; compute_type?: string; model?: string };
+
 const CHANNELS = ["stats"];
 
 export default function DashboardPage() {
   const [stats, setStats] = useState<StatsData | null>(null);
+  const [whisperHealth, setWhisperHealth] = useState<WhisperHealth | null>(null);
   const { connected } = useWebSocketChannel(
     CHANNELS,
     useCallback((msg) => {
       if (msg.type === "stats") setStats(msg.data as StatsData);
     }, [])
   );
+
+  useEffect(() => {
+    function refresh() {
+      fetch("/api/whisper/health")
+        .then((r) => r.json())
+        .then(setWhisperHealth)
+        .catch(() => setWhisperHealth(null));
+    }
+    refresh();
+    const interval = setInterval(refresh, 8000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const whisperSubtitle = whisperHealth?.device
+    ? `${whisperHealth.device.toUpperCase()} ${whisperHealth.compute_type ?? ""} · ${whisperHealth.model ?? "—"}`.trim()
+    : "—";
 
   return (
     <div className="space-y-4">
@@ -43,7 +62,7 @@ export default function DashboardPage() {
         <div className="card p-4 flex items-center justify-between">
           <div>
             <p className="text-sm font-medium text-text-primary">Whisper API</p>
-            <p className="text-xs text-text-secondary mt-0.5">CPU int8 · large-v3-turbo</p>
+            <p className="text-xs text-text-secondary mt-0.5">{whisperSubtitle}</p>
           </div>
           <StatusDot status={stats?.services.whisperApi ?? "unknown"} pulse />
         </div>

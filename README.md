@@ -1,8 +1,9 @@
 # EchoLocal AI Control
 
 Monitoring & control center for the two AI services behind EchoLocal Pro's Remote API:
-a Whisper transcription server (`whisper-api`, FastAPI/faster-whisper, CPU int8) and
-Ollama (GPU via ROCm), both running on a Proxmox LXC.
+a Whisper transcription server (`whisper-api`, FastAPI, GPU via whisper.cpp/Vulkan
+with automatic CPU/faster-whisper fallback) and Ollama (GPU via ROCm), both running
+on a Proxmox LXC.
 
 Standalone Node.js + Next.js app with a custom `server.js` (Next request handler +
 a `ws` WebSocket server on the same HTTP server) so live stats/logs push to the
@@ -63,5 +64,7 @@ and the phased deploy order). In short:
 - Ollama usage stats only capture traffic that flows through this dashboard's
   own proxy (`server/ollama-proxy.js`) — Ollama itself exposes no request-log
   endpoint, so direct EchoLocal Pro → Ollama traffic isn't visible here.
-- Whisper GPU acceleration isn't available (ctranslate2 doesn't see the LXC's
-  ROCm iGPU) — the Whisper page shows this as a status, not a broken toggle.
+- Whisper GPU acceleration runs via whisper.cpp + Vulkan (ctranslate2/ROCm has no
+  upstream backend for this iGPU, so that path was abandoned). `/health` reports
+  `device: "vulkan"` when active; falls back to CPU/faster-whisper automatically
+  if Vulkan init fails, and the Whisper page reflects whichever is actually active.
